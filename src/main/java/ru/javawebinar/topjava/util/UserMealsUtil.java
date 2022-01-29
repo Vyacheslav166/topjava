@@ -3,11 +3,13 @@ package ru.javawebinar.topjava.util;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealWithExcess;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.Arrays;
-import java.util.List;
+import java.time.chrono.ChronoLocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -24,16 +26,87 @@ public class UserMealsUtil {
         List<UserMealWithExcess> mealsTo = filteredByCycles(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
         mealsTo.forEach(System.out::println);
 
-//        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
+        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
-    public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        // TODO return filtered list with excess. Implement by cycles
-        return null;
+    /**
+     * Вывод приемов пищи согласно фильтра и с указанием, превышена ли дневная норма в этот день
+     *
+     * @param meals - список всех приемов пищи
+     * @param startTime - начиная с какого времени отображать акты приема пищи
+     * @param endTime - до какого времени отображать акты приема пищи
+     * @param caloriesPerDay - дневная норма приема пищи
+     *
+     * @return список приемов пищи, соответствующий условиям
+     */
+    public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals
+            , LocalTime startTime
+            , LocalTime endTime
+            , int caloriesPerDay) {
+        //Создаем карту дней, в которой отображается суммарное количество калорий за данный день
+        Map<LocalDate, Integer> sumCaloriesPerDay = new HashMap<>();
+        for(UserMeal userMeal : meals) {
+            LocalDate localDate = userMeal.getDateTime().toLocalDate();
+            Integer caloriesMeal = userMeal.getCalories();
+            if(sumCaloriesPerDay.containsKey(localDate)) {
+                caloriesMeal += sumCaloriesPerDay.get(localDate);
+                sumCaloriesPerDay.replace(localDate, caloriesMeal);
+            } else {
+                sumCaloriesPerDay.put(localDate, caloriesMeal);
+            }
+        }
+
+        List<UserMealWithExcess> listWithExcess = new ArrayList<>();
+
+        //Фильтруем список приема пищи и добавляем отметку о превышении дневной нормы по калориям
+        for(UserMeal userMeal : meals) {
+            if(userMeal.getDateTime().toLocalTime().isAfter(startTime) &&
+                    userMeal.getDateTime().toLocalTime().isBefore(endTime)) {
+                LocalDate localDate = userMeal.getDateTime().toLocalDate();
+                boolean excess = sumCaloriesPerDay.get(localDate) > caloriesPerDay;
+                listWithExcess.add(new UserMealWithExcess(userMeal.getDateTime()
+                        , userMeal.getDescription()
+                        , userMeal.getCalories()
+                        , excess));
+            }
+        }
+        return listWithExcess;
     }
 
+    /**
+     * Вывод приемов пищи согласно фильтра и с указанием, превышена ли дневная норма в этот день
+     *
+     * @param meals - список всех приемов пищи
+     * @param startTime - начиная с какого времени отображать акты приема пищи
+     * @param endTime - до какого времени отображать акты приема пищи
+     * @param caloriesPerDay - дневная норма приема пищи
+     *
+     * @return список приемов пищи, соответствующий условиям
+     */
     public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        // TODO Implement by streams
-        return null;
+        //Создаем карту дней, в которой отображается суммарное количество калорий за данный день
+        Map<LocalDate, Integer> sumCaloriesPerDay = new HashMap<>();
+        for(UserMeal userMeal : meals) {
+            LocalDate localDate = userMeal.getDateTime().toLocalDate();
+            Integer caloriesMeal = userMeal.getCalories();
+            if(sumCaloriesPerDay.containsKey(localDate)) {
+                caloriesMeal += sumCaloriesPerDay.get(localDate);
+                sumCaloriesPerDay.replace(localDate, caloriesMeal);
+            } else {
+                sumCaloriesPerDay.put(localDate, caloriesMeal);
+            }
+        }
+
+        ArrayList<UserMealWithExcess> filteredMeal = meals.stream()
+                .map((m) -> new UserMealWithExcess(m.getDateTime()
+                        , m.getDescription()
+                        , m.getCalories()
+                        , sumCaloriesPerDay.get(m.getDateTime().toLocalDate()) > caloriesPerDay))
+                .filter((m) -> m.getDateTime().toLocalTime().isAfter(startTime) &&
+                    m.getDateTime().toLocalTime().isBefore(endTime))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+
+        return filteredMeal;
     }
 }
