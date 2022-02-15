@@ -7,6 +7,7 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
@@ -22,7 +23,7 @@ public abstract class AbstractUserController {
         return service.getAll();
     }
 
-    public User get(int id) {
+    public User get(AtomicInteger id) {
         log.info("get {}", id);
         return service.get(id);
     }
@@ -33,12 +34,12 @@ public abstract class AbstractUserController {
         return service.create(user);
     }
 
-    public void delete(int id) {
+    public void delete(AtomicInteger id) {
         log.info("delete {}", id);
         service.delete(id);
     }
 
-    public void update(User user, int id) {
+    public void update(User user, AtomicInteger id) {
         log.info("update {} with id={}", user, id);
         assureIdConsistent(user, id);
         service.update(user);

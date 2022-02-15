@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.repository;
 import ru.javawebinar.topjava.model.Meal;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO add userId
 public interface MealRepository {
@@ -10,10 +11,10 @@ public interface MealRepository {
     Meal save(Meal meal);
 
     // false if meal does not belong to userId
-    boolean delete(int id);
+    boolean delete(AtomicInteger id);
 
     // null if meal does not belong to userId
-    Meal get(int id);
+    Meal get(AtomicInteger id);
 
     // ORDERED dateTime desc
     Collection<Meal> getAll();

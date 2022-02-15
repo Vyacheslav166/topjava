@@ -5,6 +5,7 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFound;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
@@ -22,11 +23,11 @@ public class UserService {
         return repository.save(user);
     }
 
-    public void delete(int id) {
+    public void delete(AtomicInteger id) {
         checkNotFoundWithId(repository.delete(id), id);
     }
 
-    public User get(int id) {
+    public User get(AtomicInteger id) {
         return checkNotFoundWithId(repository.get(id), id);
     }
 

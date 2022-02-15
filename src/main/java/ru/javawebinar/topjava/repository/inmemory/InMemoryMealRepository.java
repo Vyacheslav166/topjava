@@ -8,9 +8,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class InMemoryMealRepository implements MealRepository {
-    private final Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private final Map<AtomicInteger, Meal> repository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
@@ -20,8 +21,9 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public Meal save(Meal meal) {
         if (meal.isNew()) {
-            meal.setId(counter.incrementAndGet());
-            repository.put(meal.getId(), meal);
+            AtomicInteger counterMeal = new AtomicInteger(counter.incrementAndGet());
+            meal.setId(counterMeal);
+            repository.put(counterMeal, meal);
             return meal;
         }
         // handle case: update, but not present in storage
@@ -29,18 +31,20 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
-    public boolean delete(int id) {
+    public boolean delete(AtomicInteger id) {
         return repository.remove(id) != null;
     }
 
     @Override
-    public Meal get(int id) {
+    public Meal get(AtomicInteger id) {
         return repository.get(id);
     }
 
     @Override
     public Collection<Meal> getAll() {
-        return repository.values();
+        return repository.values().stream()
+                .sorted(((o1, o2) -> -o1.getDate().compareTo(o2.getDate())))
+                .collect(Collectors.toList());
     }
 }
 

@@ -3,24 +3,23 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import ru.javawebinar.topjava.model.AbstractNamedEntity;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
-    private final Map<Integer, User> repositiry = new ConcurrentHashMap<>();
+    private final Map<AtomicInteger, User> repositiry = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
-    public boolean delete(int id) {
+    public boolean delete(AtomicInteger id) {
         log.info("delete {}", id);
         return repositiry.remove(id) != null;
     }
@@ -29,7 +28,7 @@ public class InMemoryUserRepository implements UserRepository {
     public User save(User user) {
         log.info("save {}", user);
         if (user.isNew()) {
-            user.setId(counter.incrementAndGet());
+            user.setId(new AtomicInteger(counter.incrementAndGet()));
             repositiry.put(user.getId(), user);
             return user;
         }
@@ -37,7 +36,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User get(int id) {
+    public User get(AtomicInteger id) {
         log.info("get {}", id);
         return repositiry.get(id);
     }
@@ -45,7 +44,9 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        return (List<User>)repositiry.values();
+        return repositiry.values().stream()
+                .sorted((Comparator.comparing(AbstractNamedEntity::getName)))
+                .collect(Collectors.toList());
     }
 
     @Override

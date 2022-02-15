@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.User;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class AdminRestController extends AbstractUserController {
@@ -14,7 +15,7 @@ public class AdminRestController extends AbstractUserController {
     }
 
     @Override
-    public User get(int id) {
+    public User get(AtomicInteger id) {
         return super.get(id);
     }
 
@@ -24,12 +25,12 @@ public class AdminRestController extends AbstractUserController {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(AtomicInteger id) {
         super.delete(id);
     }
 
     @Override
-    public void update(User user, int id) {
+    public void update(User user, AtomicInteger id) {
         super.update(user, id);
     }
 

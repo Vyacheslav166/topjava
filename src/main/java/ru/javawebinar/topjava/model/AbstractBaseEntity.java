@@ -1,17 +1,19 @@
 package ru.javawebinar.topjava.model;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public abstract class AbstractBaseEntity {
-    protected Integer id;
+    protected AtomicInteger id;
 
-    protected AbstractBaseEntity(Integer id) {
+    protected AbstractBaseEntity(AtomicInteger id) {
         this.id = id;
     }
 
-    public void setId(Integer id) {
+    public void setId(AtomicInteger id) {
         this.id = id;
     }
 
-    public Integer getId() {
+    public AtomicInteger getId() {
         return id;
     }
 
